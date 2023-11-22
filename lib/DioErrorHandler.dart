@@ -11,11 +11,11 @@ class DioErrorHandler {
       case DioErrorType.cancel:
         errorResponse.message = "Request to API server was cancelled";
         break;
-      case DioErrorType.connectionTimeout:
+      case DioErrorType.connectTimeout:
         errorResponse.message = "Connection timeout with API server";
         break;
-      case DioErrorType.unknown:
-        if ((dioError.message?.contains("RedirectException") ?? false)) {
+      case DioErrorType.other:
+        if ((dioError.message.contains("RedirectException"))) {
           errorResponse.message = "${dioError.message}";
         } else {
           errorResponse.message = "Please check the internet connection";
@@ -24,7 +24,7 @@ class DioErrorHandler {
       case DioErrorType.receiveTimeout:
         errorResponse.message = "Receive timeout in connection with API server";
         break;
-      case DioErrorType.badResponse:
+      case DioErrorType.response:
         try {
           if (dioError.response?.data['message'] != null) {
             errorResponse.message = dioError.response?.data['message'];
@@ -32,15 +32,13 @@ class DioErrorHandler {
             if ((dioError.response?.statusMessage ?? "").isNotEmpty)
               errorResponse.message = dioError.response?.statusMessage;
             else
-              return _handleError(
-                  dioError.response!.statusCode, dioError.response!.data);
+              return _handleError(dioError.response!.statusCode, dioError.response!.data);
           }
         } catch (e) {
           if ((dioError.response?.statusMessage ?? "").isNotEmpty)
             errorResponse.message = dioError.response?.statusMessage;
           else
-            return _handleError(
-                dioError.response!.statusCode, dioError.response!.data);
+            return _handleError(dioError.response!.statusCode, dioError.response!.data);
         }
 
         break;
@@ -86,8 +84,7 @@ class DioErrorHandler {
   getMas(dynamic error) {
     print("myError ${error.runtimeType}");
     if (error.runtimeType != String) {
-      errorResponse.message =
-          error['message'].toString(); //?? S.of(Get.context).something_wrong;
+      errorResponse.message = error['message'].toString(); //?? S.of(Get.context).something_wrong;
     } else {
       if (error['msg'] != null) {
         errorResponse.message = error['msg'].toString();
@@ -120,8 +117,7 @@ class ErrorHandler {
   ErrorResponse errorResponse = ErrorResponse();
 
   ErrorResponse handleError(var error) {
-    if (error.runtimeType.toString().toLowerCase() ==
-        "_TypeError".toLowerCase()) {
+    if (error.runtimeType.toString().toLowerCase() == "_TypeError".toLowerCase()) {
       // return error.toString();
       errorResponse.message = "The Provided API key is invalid";
       return errorResponse;
