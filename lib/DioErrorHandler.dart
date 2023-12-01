@@ -6,25 +6,25 @@ class DioErrorHandler {
   ErrorResponse errorResponse = ErrorResponse();
   String errorDescription = "";
 
-  ErrorResponse handleDioError(DioError dioError) {
+  ErrorResponse handleDioError(DioException dioError) {
     switch (dioError.type) {
-      case DioErrorType.cancel:
+      case DioExceptionType.cancel:
         errorResponse.message = "Request to API server was cancelled";
         break;
-      case DioErrorType.connectTimeout:
+      case DioExceptionType.connectionTimeout:
         errorResponse.message = "Connection timeout with API server";
         break;
-      case DioErrorType.other:
-        if ((dioError.message.contains("RedirectException"))) {
+      case DioExceptionType.unknown:
+        if (((dioError.message ?? "").contains("RedirectException"))) {
           errorResponse.message = "${dioError.message}";
         } else {
           errorResponse.message = "Please check the internet connection";
         }
         break;
-      case DioErrorType.receiveTimeout:
+      case DioExceptionType.receiveTimeout:
         errorResponse.message = "Receive timeout in connection with API server";
         break;
-      case DioErrorType.response:
+      case DioExceptionType.badResponse:
         try {
           if (dioError.response?.data['message'] != null) {
             errorResponse.message = dioError.response?.data['message'];
@@ -42,7 +42,7 @@ class DioErrorHandler {
         }
 
         break;
-      case DioErrorType.sendTimeout:
+      case DioExceptionType.sendTimeout:
         errorResponse.message = "Send timeout in connection with API server";
         break;
       default:
@@ -121,7 +121,7 @@ class ErrorHandler {
       // return error.toString();
       errorResponse.message = "The Provided API key is invalid";
       return errorResponse;
-    } else if (error is DioError) {
+    } else if (error is DioException) {
       return DioErrorHandler().handleDioError(error);
     }
     errorResponse.message = "The Provided API key is invalid";
